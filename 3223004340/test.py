@@ -156,6 +156,37 @@ class TestPaperCheck(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             read_file("non_exist.txt")
 
+    def test_jaccard_pass_cosine_zero(self):
+        """测试Jaccard初筛通过但余弦相似度低的场景"""
+        orig_text = "我喜欢苹果"
+        copy_text = "我喜欢香蕉"
+        similarity = hybrid_similarity(orig_text, copy_text)
+        self.assertTrue(similarity < 1.00)
+
+    def test_jaccard_pass_lcs_zero(self):
+        """测试Jaccard初筛通过但LCS相似度低的场景"""
+        orig_text = "红色的花朵"
+        copy_text = "蓝色的天空"
+        similarity = hybrid_similarity(orig_text, copy_text)
+        self.assertEqual(type(similarity), float)
+        self.assertTrue(similarity < 1.00)
+
+    def test_cosine_special_case(self):
+        """测试纯标点文本的混合相似度计算（特殊输入场景）"""
+        orig_text = "，，，，，，，，，，"
+        copy_text = "。。。。。。。。。。"
+        similarity = hybrid_similarity(orig_text, copy_text)
+        self.assertEqual(type(similarity), float)
+        self.assertTrue(similarity < 1.00)
+        self.assertTrue(similarity <= 0.1)
+
+    def test_jaccard_special_case(self):
+        """测试纯特殊符号文本的混合相似度计算（特殊输入场景）"""
+        orig_text = "####"
+        copy_text = "$$$$"
+        similarity = hybrid_similarity(orig_text, copy_text)
+        self.assertEqual(round(similarity, 2), 0.00)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
